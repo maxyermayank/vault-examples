@@ -1,0 +1,126 @@
+version: "3.6"
+
+services:
+  consulserver:
+    image: consul:${CONSUL_TAG:-latest}
+    restart: unless-stopped
+    volumes:
+      - ${PWD}/consul/server:/consul/config
+      - consul_files:/consul/data
+    ports:
+      - target: 8300
+        published: 8300
+        mode: host
+      - target: 8301
+        published: 8301
+        mode: host
+      - target: 8302
+        published: 8302
+        mode: host
+      - target: 8400
+        published: 8400
+        mode: host
+      - target: 8500
+        published: 8500
+        mode: host
+      - target: 8600
+        published: 8600
+        mode: host
+    command:
+      - agent
+      - -server
+      - -config-file=/consul/config/config.json
+      - -ui
+    networks:
+      - devops
+    deploy:
+      resources:
+        reservations:
+          cpus: '.25'
+          memory: 256M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      update_config:
+        order: stop-first
+  consulagent:
+    image: consul:${CONSUL_TAG:-latest}
+    restart: unless-stopped
+    volumes:
+      - ${PWD}/consul/agent:/consul/config
+      - consul_agent_files:/consul/data
+    command:
+      - agent
+      - -config-file=/consul/config/config.json
+    networks:
+      - devops
+    deploy:
+      resources:
+        reservations:
+          cpus: '.25'
+          memory: 256M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      update_config:
+        order: stop-first
+  vault:
+    image: vault:${VAULT_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      VAULT_ADDR: http://127.0.0.1:8200
+      VAULT_LOCAL_CONFIG: >-
+        {
+          "ui": true,
+          "backend": {
+            "consul": {
+              "address" : "http://consulserver:8500",
+              "path" : "vault/"
+            }
+          },
+          "default_lease_ttl": "168h",
+          "max_lease_ttl": "720h",
+          "plugin_directory" : "/vault/plugins",
+          "listener": {
+            "tcp": {
+              "address": "0.0.0.0:8200",
+              "tls_disable": true
+            }
+          }, 
+          "disable_mlock": true
+        }
+    command: 
+      - server
+    networks:
+      - devops
+    volumes:
+      - vault_logs:/vault/logs
+      - ${PWD}/vault/plugins:/vault/plugins
+    ports:
+      - target: 8200
+        published: 8200
+        mode: host
+    deploy:
+      resources:
+        reservations:
+          cpus: '.25'
+          memory: 256M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      update_config:
+        order: stop-first
+  
+volumes:
+  consul_files:
+  consul_agent_files:
+  vault_logs:
+
+networks:
+  devops:

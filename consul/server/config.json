@@ -1,0 +1,37 @@
+{
+    "bootstrap": true,
+    "server": true,
+    "datacenter": "us-east-1",
+    "data_dir": "/consul/data",
+    "client_addr": "0.0.0.0",
+    "bind_addr": "{{ GetInterfaceIP \"eth0\" }}",
+    "advertise_addr" : "{{ GetInterfaceIP \"eth0\" }}",
+    "bootstrap_expect": 1,
+    "ui": true,
+    "leave_on_terminate" : true,
+    "skip_leave_on_interrupt" : true,
+    "disable_update_check": true,
+    "addresses" : {
+      "http" : "0.0.0.0"
+    },
+    "ports": {
+      "http": 8500
+    },
+    "log_level": "DEBUG",
+    "acl_enforce_version_8": false,
+    "acl_datacenter": "us-east-1",
+    "acl_master_token": "w94RIMKUtQH1a4VJGN+t+vn1Y0nErc/ch93E1F1ZcHU=",
+    "acl_default_policy": "allow",
+    "connect" : {
+      "enabled" : true
+    },
+    "dns_config": {
+      "allow_stale": false
+    },
+    "autopilot": {
+      "cleanup_dead_servers": true
+    },
+    "retry_join" : [
+      "tasks.consulserver"
+    ]
+  }
