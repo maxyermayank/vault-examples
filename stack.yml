@@ -116,11 +116,36 @@ services:
         window: 120s
       update_config:
         order: stop-first
+  mongo:
+    image: mongo:3
+    volumes:
+      - mongo_data:/data/db
+    ulimits:
+      nproc: 65535
+    networks:
+      - devops
+    ports:
+      - target: 27017
+        published: 27017
+        mode: host
+    deploy:
+      # resources:
+      #   reservations:
+      #     cpus: '.25'
+      #     memory: 256M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      update_config:
+        order: stop-first
   
 volumes:
   consul_files:
   consul_agent_files:
   vault_logs:
+  mongo_data:
 
 networks:
   devops:
