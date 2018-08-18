@@ -1,27 +1,54 @@
 # vault-consul-swarm-cluster
 
+### Prerequisite:
+1. Docker
+2. Docker Swarm
 
-## Deploy Stack
+### Enable Docker Swarm locally
+```
+docker swarm init
+```
+
+### List Docker Swarm Node
+```
+docker node ls
+```
+
+### Deploy Stack
 ```
 env $(cat .env | grep ^[A-Z] | xargs) docker stack deploy -c stack.yml devops
 ```
 
-## Remove Stack
+### Remove Stack
 ```
 docker stack rm devops
 ```
 
-## List Docker Services
+### List Docker Services
 ```
 docker service ls
 ```
 
-## Access Vault UI
+### Access Vault UI
 ```
 open http://localhost:8200
 ```
 
-## Access Consul UI
+![](images/init.png)
+![](images/unseal.png)
+![](images/login.png)
+![](images/vaultcli.png)
+
+### Access Consul UI
 ```
 open http://localhost:8500
 ```
+![](images/consul.png)
+![](images/consulkv.png)
+
+
+### Static credential
+![](images/staticcred.png)
+
+### Dynamic credential
+![](images/dynamiccred.png)
