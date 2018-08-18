@@ -29,6 +29,18 @@ docker stack rm devops
 docker service ls
 ```
 
+### Deploy using Docker-compose
+#### Deploy
+```
+docker-compose up -d
+```
+
+#### Terminate
+```
+docker-compose down
+```
+
+
 ### Access Vault UI
 ```
 open http://localhost:8200

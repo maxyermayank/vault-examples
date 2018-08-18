@@ -1,0 +1,86 @@
+version: "3.6"
+
+services:
+  consul:
+    image: consul:${CONSUL_TAG}
+    restart: unless-stopped
+    environment:
+      CONSUL_LOCAL_CONFIG: >-
+        {
+          "bootstrap": true,
+          "server": true,
+          "node_name": "consul1",
+          "datacenter": "us-west-2",
+          "data_dir": "/var/consul/data",
+          "bind_addr": "0.0.0.0",
+          "client_addr": "0.0.0.0",
+          "bootstrap_expect": 1,
+          "ui": true,
+          "addresses" : {
+            "http" : "0.0.0.0"
+          },
+          "ports": {
+            "http": 8500
+          },
+          "log_level": "DEBUG",
+          "acl_enforce_version_8": false,
+          "acl_datacenter": "us-west-2",
+          "acl_master_token": "w94RIMKUtQH1a4VJGN+t+vn1Y0nErc/ch93E1F1ZcHU=",
+          "acl_default_policy": "allow",
+          "connect" : {
+            "enabled" : true
+          }
+        }
+    volumes:
+      - consul_files:/consul
+    ports:
+      - 8300:8300
+      - 8301:8301
+      - 8302:8302
+      - 8400:8400
+      - 8500:8500
+      - 8600:8600
+    command:
+      - agent
+      - -server
+      - -client=0.0.0.0
+      - -bind=0.0.0.0
+      - -ui
+  vault:
+    image: vault:${VAULT_TAG}
+    restart: unless-stopped
+    environment:
+      VAULT_ADDR: http://127.0.0.1:8200
+      VAULT_LOCAL_CONFIG: >-
+        {
+          "ui": true,
+          "backend": {
+            "consul": {
+              "address" : "vault-consul-swarm-cluster_consul_1:8500",
+              "scheme" : "http",
+              "path" : "vault/"
+            }
+          },
+          "default_lease_ttl": "168h",
+          "max_lease_ttl": "720h",
+          "plugin_directory" : "/vault/plugins",
+          "listener": {
+            "tcp": {
+              "address": "0.0.0.0:8200",
+              "tls_disable": 1
+            }
+          }
+        }
+    command: server
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - vault_logs:/vault/logs
+      - ${PWD}/plugins:/vault/plugins
+    ports:
+      - 8200:8200
+volumes:
+  consul_files:
+  vault_logs:
+
+secrets: {}
